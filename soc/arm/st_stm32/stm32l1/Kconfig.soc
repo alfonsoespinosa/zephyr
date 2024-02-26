@@ -25,4 +25,7 @@ config SOC_STM32L152XC
 config SOC_STM32L152XE
 	bool "STM32L152XE"
 
+config SOC_STM32L100XC
+	bool "STM32L100XC"
+
 endchoice
