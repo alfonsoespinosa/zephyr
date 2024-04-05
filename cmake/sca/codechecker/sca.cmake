@@ -20,6 +20,8 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_byproducts
 
 add_custom_target(codechecker ALL
   COMMAND ${CODECHECKER_EXE} analyze
+#    --verbose debug
+    --cppcheckargs /home/adi_dev/ncs/zephyr/samples/hello_world/cppcheckargsfile
     --keep-gcc-include-fixed
     --keep-gcc-intrin
     --output ${output_dir}/codechecker.plist
