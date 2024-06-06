@@ -81,7 +81,10 @@ class NrfJprogBinaryRunner(NrfBinaryRunner):
                 cmd.append('--qspisectorerase')
             if _op.get('verify'):
                 # In the future there might be multiple verify modes
-                cmd.append('--verify')
+                if self.family == 'NRF91_FAMILY':
+                    self.logger.warning(f'Skipping "verify" for: nRF91')
+                else:
+                    cmd.append('--verify')
         elif op_type == 'recover':
             cmd.append('--recover')
         elif op_type == 'reset':
