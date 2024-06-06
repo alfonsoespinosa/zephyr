@@ -57,6 +57,20 @@
 #include <inttypes.h>
 #include <zephyr/sys/__assert.h>
 
+#if !defined(CONFIG_KERNEL_VM_USE_CUSTOM_MEM_RANGE_CHECK)
+  #if CONFIG_SRAM_BASE_ADDRESS != 0
+    #define PHYS_ADDR_ABOVE_SRAM_START(addr) (addr >= CONFIG_SRAM_BASE_ADDRESS)
+  #else
+    #define PHYS_ADDR_ABOVE_SRAM_START(addr) 0
+  #endif
+  #if (CONFIG_SRAM_BASE_ADDRESS + (CONFIG_SRAM_SIZE * 1024UL)) != 0
+    #define PHYS_ADDR_BELOW_SRAM_END(addr) (addr < (CONFIG_SRAM_BASE_ADDRESS + \
+          (CONFIG_SRAM_SIZE * 1024UL)))
+  #else
+    #define PHYS_ADDR_BELOW_SRAM_END(addr) 0
+  #endif
+#endif
+
 /* Just like Z_MEM_PHYS_ADDR() but with type safety and assertions */
 static inline uintptr_t z_mem_phys_addr(void *virt)
 {
@@ -79,16 +93,7 @@ static inline uintptr_t z_mem_phys_addr(void *virt)
 		 "address %p not in permanent mappings", virt);
 #else
 	/* Should be identity-mapped */
-	__ASSERT(
-#if CONFIG_SRAM_BASE_ADDRESS != 0
-		 (addr >= CONFIG_SRAM_BASE_ADDRESS) &&
-#endif
-#if (CONFIG_SRAM_BASE_ADDRESS + (CONFIG_SRAM_SIZE * 1024UL)) != 0
-		 (addr < (CONFIG_SRAM_BASE_ADDRESS +
-			  (CONFIG_SRAM_SIZE * 1024UL))),
-#else
-		 false,
-#endif
+	__ASSERT(PHYS_ADDR_ABOVE_SRAM_START(addr) && PHYS_ADDR_BELOW_SRAM_END(addr),
 		 "physical address 0x%lx not in RAM",
 		 (unsigned long)addr);
 #endif /* CONFIG_MMU */
@@ -107,16 +112,7 @@ static inline void *z_mem_virt_addr(uintptr_t phys)
 	__ASSERT(sys_mm_is_phys_addr_in_range(phys),
 		"physical address 0x%lx not in RAM", (unsigned long)phys);
 #else
-	__ASSERT(
-#if CONFIG_SRAM_BASE_ADDRESS != 0
-		 (phys >= CONFIG_SRAM_BASE_ADDRESS) &&
-#endif
-#if (CONFIG_SRAM_BASE_ADDRESS + (CONFIG_SRAM_SIZE * 1024UL)) != 0
-		 (phys < (CONFIG_SRAM_BASE_ADDRESS +
-			  (CONFIG_SRAM_SIZE * 1024UL))),
-#else
-		 false,
-#endif
+	__ASSERT(PHYS_ADDR_ABOVE_SRAM_START(phys) && PHYS_ADDR_BELOW_SRAM_END(phys),
 		 "physical address 0x%lx not in RAM", (unsigned long)phys);
 #endif
 

@@ -18,12 +18,17 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands COMMAND
 set_property(GLOBAL APPEND PROPERTY extra_post_build_byproducts
   ${output_dir}/codechecker.ready)
 
+set(CPPCHECK_ARGS "-D__GNUC__ -D__BYTE_ORDER__=1234 -D__CHAR_BIT__=8 -D__SIZEOF_LONG__=4 -D__SIZEOF_LONG_LONG__=8 --include=${AUTOCONF_H}")
+set(CPPCHECK_ARGS_FILE ${CMAKE_BINARY_DIR}/cppcheck_args)
+file(WRITE ${CPPCHECK_ARGS_FILE} "${CPPCHECK_ARGS}")
+
 add_custom_target(codechecker ALL
   COMMAND ${CODECHECKER_EXE} analyze
     --keep-gcc-include-fixed
     --keep-gcc-intrin
     --output ${output_dir}/codechecker.plist
     --name zephyr # Set a default metadata name
+    --cppcheckargs ${CPPCHECK_ARGS_FILE}
     ${CODECHECKER_ANALYZE_OPTS}
     ${CMAKE_BINARY_DIR}/compile_commands.json
   DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json ${output_dir}/codechecker.ready

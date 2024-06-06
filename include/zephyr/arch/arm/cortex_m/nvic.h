@@ -23,6 +23,11 @@
 #define NVIC_NODEID DT_INST(0, arm_v6m_nvic)
 #endif
 
+#if defined(CONFIG_SOC_NRF52840_QIAA) || defined(CONFIG_SOC_NRF5340_CPUAPP_QKAA) || \
+    defined(CONFIG_SOC_NRF9160_SICA)  || defined(CONFIG_SOC_NRF9161_LACA)
+#define NUM_IRQ_PRIO_BITS 3
+#else
 #define NUM_IRQ_PRIO_BITS DT_PROP(NVIC_NODEID, arm_num_irq_priority_bits)
+#endif
 
 #endif /* ZEPHYR_INCLUDE_ARCH_ARM_AARCH32_CORTEX_M_NVIC_H_ */
