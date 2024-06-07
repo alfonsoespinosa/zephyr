@@ -24,8 +24,17 @@ add_custom_command(OUTPUT ${CPPCHECK_INPUT_COMPILATION_DATABASE}
   DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
 )
 
+set(CODECHECKER_SKIPFILE ${CMAKE_BINARY_DIR}/skipfile)
+set(SKIPFILE_LINES
+  -/work/nrf-sdk/modules/*
+  -/work/nrf-sdk/adi-third-parties/*
+)
+string(REPLACE ";" "\n" SKIPFILE_LINES "${SKIPFILE_LINES}")
+file(WRITE ${CODECHECKER_SKIPFILE} "${SKIPFILE_LINES}")
+
 add_custom_target(codechecker ALL
   COMMAND ${CODECHECKER_EXE} analyze
+    -i ${CODECHECKER_SKIPFILE}
     --keep-gcc-include-fixed
     --keep-gcc-intrin
     --output ${output_dir}/codechecker.plist
