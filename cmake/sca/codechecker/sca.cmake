@@ -18,6 +18,12 @@ set_property(GLOBAL APPEND PROPERTY extra_post_build_commands COMMAND
 set_property(GLOBAL APPEND PROPERTY extra_post_build_byproducts
   ${output_dir}/codechecker.ready)
 
+set(CPPCHECK_INPUT_COMPILATION_DATABASE ${CMAKE_BINARY_DIR}/compile_commands_cppcheck.json)
+add_custom_command(OUTPUT ${CPPCHECK_INPUT_COMPILATION_DATABASE}
+  COMMAND sed ARGS s/'\\-I\\/work\\/nrf-sdk\\/zephyr\\/include'//g ${CMAKE_BINARY_DIR}/compile_commands.json > ${CPPCHECK_INPUT_COMPILATION_DATABASE}
+  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+)
+
 add_custom_target(codechecker ALL
   COMMAND ${CODECHECKER_EXE} analyze
     --keep-gcc-include-fixed
@@ -25,8 +31,8 @@ add_custom_target(codechecker ALL
     --output ${output_dir}/codechecker.plist
     --name zephyr # Set a default metadata name
     ${CODECHECKER_ANALYZE_OPTS}
-    ${CMAKE_BINARY_DIR}/compile_commands.json
-  DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json ${output_dir}/codechecker.ready
+    ${CPPCHECK_INPUT_COMPILATION_DATABASE}
+  DEPENDS ${CPPCHECK_INPUT_COMPILATION_DATABASE} ${output_dir}/codechecker.ready
   BYPRODUCTS ${output_dir}/codechecker.plist
   VERBATIM
   USES_TERMINAL
